@@ -107,8 +107,8 @@ void read_from_esp()
     read++;
     delayMicroseconds(10);
     if(rcvd == 'y')
-    resetFunc(); //call reset 
-        
+    delay(2500);
+    //resetFunc(); //call reset         
   }  
 }
 void make_data()
@@ -169,10 +169,10 @@ void setup()
   pinMode(ROW_8, OUTPUT);
   pinMode(ROW_9, OUTPUT);
   PC.begin(230400);
-  ESP.begin(115200);
+  ESP.begin(9600);
 
-  PC.print("Mega_4\n");  
-  
+  PC.print("Mega_4.1\n");  
+  delay(5000);
 }
 void loop() 
 {
@@ -183,45 +183,28 @@ void loop()
   read_FSR();
   data_to_send.temperature_1 = tem_cal();
   if(data_to_send.temperature_1 > 96.2)
-  data_to_send.temperature_1 = 96.2;  
-  rp_t--;
-  if(!rp_t)
-  { 
-    //PC.print("count pressure detected: ");
-    //PC.println(count_pressure_detected);
-    
-  //_______________________________________
-  //tpr = tem_cal(read_adc());
-    if(data_to_send.temperature_1 < 78) 
-    data_to_send.temperature_1 =78;
-  //__________________________________
- 
-    if( data_to_send.fsr3 > 28 || data_to_send.fsr4 > 28 || data_to_send.fsr7 > 28 || data_to_send.fsr8 > 28 )
-    {
-      count_pressure_detected ++;
-      
+  data_to_send.temperature_1 = 96.2; 
+  else if(data_to_send.temperature_1 < 78) 
+  data_to_send.temperature_1 =78; 
+  if( data_to_send.fsr3 > 28 || data_to_send.fsr4 > 28 || data_to_send.fsr7 > 28 || data_to_send.fsr8 > 28 )
+  {
+      count_pressure_detected ++;  
       if(count_pressure_detected>4)
       {
-          digitalWrite(PULSE_SENSOR_POWER, HIGH);
-          //PC.println("pulse sensor on");
-           count_pressure_detected=4;
-          //PC.println("in first set");
+          digitalWrite(PULSE_SENSOR_POWER, HIGH);//PC.println("pulse sensor on");
+          count_pressure_detected=4;
       }
-    }
-    if (data_to_send.fsr3 <=28 && data_to_send.fsr4 <=28 && data_to_send.fsr7 <=28 && data_to_send.fsr8 <=28 && count_pressure_detected > 0)
-    {
-         //PC.println("in second set");
-         count_pressure_detected --;
-    }
-    if(!count_pressure_detected)
-    digitalWrite(PULSE_SENSOR_POWER, LOW);
+  }
+  if (data_to_send.fsr3 <=28 && data_to_send.fsr4 <=28 && data_to_send.fsr7 <=28 && data_to_send.fsr8 <=28 && count_pressure_detected > 0)
+  {
+      count_pressure_detected --;
+  }
+  if(!count_pressure_detected)
+  digitalWrite(PULSE_SENSOR_POWER, LOW);
   
-   //__________________________________________
-    make_data();
-    send_data();
-    rp_t = 1;
-  }  
+  //__________________________________________
+  make_data();
+  send_data();
   read_from_esp();
-  delay(700);  
-  
+  delay(800);    
 }
