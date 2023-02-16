@@ -38,15 +38,20 @@ typedef struct myData
 }DATAS;
 
 DATAS raw_data;
-
+int faulty_structure_detected=0;
 void make_JSON()
 {
   if(raw_data.fsr16 > 179 || raw_data.fsr16 <28)
   {
       memset(&raw_data, 0x00, sizeof(myData));
-      Serial.print("structure faulty");
-      ESP.restart();
+      //Serial.print("structure faulty");
+      //delay(100);//ESP.restart();
+      faulty_structure_detected=1;
       return;
+  }
+  else
+  {
+    faulty_structure_detected=0;
   }
   
  char  num[10];
@@ -258,7 +263,7 @@ int parse_data()
 void setup() 
 {
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   Serial.println();
   Serial.println();
@@ -294,18 +299,10 @@ void loop()
     // httpCode will be negative on error
     if (httpCode > 0) 
     {
-      // HTTP header has been send and Server response header has been handled
-      // file found at server
-      memset(payload, 0x00, 370);
-      strcat(payload,"sent");
-      if (httpCode == HTTP_CODE_OK) 
-      {
-        const String& payload = http.getString();
-      }
-      Serial.println(payload);
+      Serial.print("sent");
     } else {
       //Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
-      Serial.print("fail\n");
+      Serial.print("fail");
     }
 
     http.end();    
