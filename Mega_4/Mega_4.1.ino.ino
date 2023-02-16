@@ -1,3 +1,4 @@
+#define    PULSE_PIN A12
 #define    PC        Serial
 #define    ESP       Serial3
 #define    COLUMN_7  A0
@@ -10,7 +11,7 @@
 #define    ROW_5     19
 #define    THERMOCOUPLE_1   A14
 #define    PULSE_SENSOR_POWER 9
-int        rp_t = 5;
+int        rp_t = 20;
 int        count_pressure_detected=0;
 void(* resetFunc) (void) = 0;//declare reset function at address 0
 typedef struct myData 
@@ -137,7 +138,76 @@ float tem_cal()
   }
   return temp;
 }
-
+int threshold()
+{
+  int i;
+  unsigned long int s_value=0;
+  for(i=0;i<1000;i++)
+  {
+      s_value = s_value+analogRead(PULSE_PIN);
+      delay(1);
+  } 
+  return(s_value/1000);
+}
+int pulse_adc()
+{
+  int i=0;
+  int sensorValue=0;
+  for(i=0;i<50;i++)
+  {
+      sensorValue = sensorValue+analogRead(PULSE_PIN);
+      delayMicroseconds(100);
+  } 
+  //PC.println(sensorValue/50); 
+  return(sensorValue/50);//this is one sample
+}
+int get_pulse()
+{
+    int pulse_high_flag=0;
+    static  unsigned long old_t=0;
+    static unsigned long current_t=0;
+    int pulse=0;
+    int val_1=0;
+    int thr;
+    thr=threshold();
+    int pulse_upper=thr+1;//510;
+    int pulse_lower=thr-1;//509;
+    unsigned long count=0;
+       
+  while(val_1<=pulse_upper)
+  {
+      val_1=pulse_adc();
+      count++;
+      if(count > 1000)
+      return 0;
+      //delayMicroseconds(10);
+  }
+  old_t=millis();
+  count =0;
+  while(val_1>=pulse_lower)
+  {
+      val_1=pulse_adc();
+      count++;
+      if(count>1000)
+      return 0;
+      //delayMicroseconds(10);
+  }
+  count =0;
+  while(val_1<=pulse_upper)
+  {     
+        val_1=pulse_adc();
+        count++;
+        if(count>1000)
+        return 0;
+        //delayMicroseconds(10);
+  }
+  current_t=millis();
+  pulse=(60000)/(current_t - old_t);
+  if(pulse>60 &&pulse<140)
+  return(pulse);
+  else
+  return(0);
+}
 void send_data()
 {
   
@@ -150,15 +220,19 @@ void send_data()
     PC.print("port busy\n");
 }
 void setup() 
-{ pinMode(9, OUTPUT);
+{ 
+  pinMode(9, OUTPUT);
   pinMode(ROW_5, OUTPUT);
   pinMode(ROW_6, OUTPUT);
   pinMode(ROW_8, OUTPUT);
   pinMode(ROW_9, OUTPUT);
+  pinMode(PULSE_SENSOR_POWER, OUTPUT);
   PC.begin(230400);
   ESP.begin(115200);
 
-  PC.print("Mega_4.1\n");  
+  PC.print("Mega_4.2\n"); 
+  //digitalWrite(PULSE_SENSOR_POWER, HIGH);
+  //PC.print(threshold()); 
   delay(5000);
 }
 void loop() 
@@ -167,7 +241,8 @@ void loop()
   float tpr;
   static int count_94 =0;
   static char random=0;
-  
+  int current_pulse=0;
+  static int pulse_static= 92;
   read_FSR();
   
   data_to_send.temperature_1 = tem_cal();
@@ -180,8 +255,26 @@ void loop()
       count_pressure_detected ++;  
       if(count_pressure_detected>4)
       {
-          digitalWrite(PULSE_SENSOR_POWER, HIGH);//PC.println("pulse sensor on");
+          digitalWrite(PULSE_SENSOR_POWER, HIGH);
+          //PC.println("pulse sensor on");
+          if(rp_t==1)
+          {
+            current_pulse=get_pulse();
+            if(current_pulse> data_to_send.pulse)
+            pulse_static++;
+            if(current_pulse < data_to_send.pulse)
+            pulse_static--;
+            if(current_pulse> data_to_send.pulse)
+            pulse_static++;
+            if(current_pulse < data_to_send.pulse)
+            pulse_static--;
+            
+            PC.println(current_pulse);
+          }  
           count_pressure_detected=4;
+          data_to_send.pulse=pulse_static;
+          //if(!current_pulse)
+          //data_to_send.pulse=0;
       }
   }
   if (data_to_send.fsr3 <=28 && data_to_send.fsr4 <=28 && data_to_send.fsr7 <=28 && data_to_send.fsr8 <=28 && count_pressure_detected > 0)
@@ -189,7 +282,10 @@ void loop()
       count_pressure_detected --;
   }
   if(!count_pressure_detected)
-  digitalWrite(PULSE_SENSOR_POWER, LOW);
+  {
+    digitalWrite(PULSE_SENSOR_POWER, LOW);
+    data_to_send.pulse=0;
+  }
   
   //__________________________________________
   
@@ -201,7 +297,12 @@ void loop()
     delay(150);
     send_data();
   }
-    
+  rp_t--;
+  if(!rp_t)    
+  {
+    rp_t=15;
+
+  }
       
   //delay(2);    //700 is good
 }
