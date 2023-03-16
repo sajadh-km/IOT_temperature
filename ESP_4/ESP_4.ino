@@ -4,8 +4,8 @@
 #define IP_2  "http://4.227.240.135:552/SaveVetMatReading"
 
 #ifndef STASSID
-#define STASSID "pet_pat"
-#define STAPSK "12345678"
+#define STASSID "infinicomm"
+#define STAPSK "omk@r27hsr"
 #endif
 char       payload[9000];
 
@@ -28,6 +28,7 @@ void make_JSON()
   {
       memset(&raw_data, 0x00, sizeof(raw_data));
       faulty_structure_detected=1;
+      Serial.print("faulty");
       return;
   }
   else
