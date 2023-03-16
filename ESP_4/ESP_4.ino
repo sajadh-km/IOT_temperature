@@ -1,8 +1,4 @@
 
-#include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
-
-
 #define MY_IP "http://73ad2f2f-9cb1-488c-b91c-a54cf53f6e80.mock.pstmn.io"
 #define IP_2  "http://4.227.240.135:552/SaveVetMatReading"
 
@@ -16,8 +12,8 @@ char       payload[9000];
 
 typedef struct myData 
 {
-  int fsr[101];
-  int pulse;
+  short int fsr[101];
+  short int pulse;
   float temperature_1;
   float temperature_2;
 }DATAS;

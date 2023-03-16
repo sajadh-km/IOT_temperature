@@ -16,25 +16,11 @@ int        count_pressure_detected=0;
 void(* resetFunc) (void) = 0;//declare reset function at address 0
 typedef struct myData 
 {
-  long int fsr1;
-  long int fsr2;
-  long int fsr3;
-  long int fsr4;
-  long int fsr5;
-  long int fsr6;
-  long int fsr7;
-  long int fsr8;
-  long int fsr9;
-  long int fsr10;
-  long int fsr11;
-  long int fsr12;
-  long int fsr13;
-  long int fsr14;
-  long int fsr15;
-  long int fsr16;
-  long int pulse;
+  int fsr[101];
+  int pulse;
   float temperature_1;
   float temperature_2;
+
 }DATAS;
 
 DATAS data_to_send;
