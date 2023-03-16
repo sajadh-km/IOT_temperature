@@ -1,4 +1,5 @@
-
+#include<WiFi.h>
+#include<HTTPClient.h>
 #define MY_IP "http://73ad2f2f-9cb1-488c-b91c-a54cf53f6e80.mock.pstmn.io"
 #define IP_2  "http://4.227.240.135:552/SaveVetMatReading"
 
