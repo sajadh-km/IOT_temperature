@@ -4,8 +4,8 @@
 #define IP_2  "http://4.227.240.135:552/SaveVetMatReading"
 
 #ifndef STASSID
-#define STASSID "infinicomm"
-#define STAPSK "omk@r27hsr"
+#define STASSID "pet_pat"
+#define STAPSK "12345678"
 #endif
 char       payload[9000];
 
