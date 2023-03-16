@@ -16,8 +16,8 @@ int        count_pressure_detected=0;
 void(* resetFunc) (void) = 0;//declare reset function at address 0
 typedef struct myData 
 {
-  int fsr[101];
-  int pulse;
+  short int fsr[101];
+  short int pulse;
   float temperature_1;
   float temperature_2;
 
