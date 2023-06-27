@@ -1,0 +1,1 @@
+File 'Arduino_mega_shield_layout.pcb' can be opened in 'expressPCB' software.
